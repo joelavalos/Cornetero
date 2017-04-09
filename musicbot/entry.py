@@ -214,6 +214,18 @@ class URLPlaylistEntry(BasePlaylistEntry):
         except Exception as e:
             raise ExtractionError(e)
 
+        infile = open('config/autoplaylist.txt', 'a')  # Open the file for reading.
+
+        if os.stat('config/autoplaylist.txt').st_size == 0:
+            infile.write(self.url)
+            infile.close()
+
+        else:
+            infile.write("\n" + self.url)
+            infile.close()
+
+        print("Cancion agregada")
+
         print("[Download] Complete:", self.url)
 
         if result is None:

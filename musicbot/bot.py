@@ -855,6 +855,9 @@ class MusicBot(discord.Client):
         result from a youtube search is added to the queue.
         """
 
+        self.autoplaylist = load_file(self.config.auto_playlist_file)
+        self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel,  "Actualizando la caga de lista")
+
         msg_by_nigga = 'Hora de sacar la basura'
         msg_nigga_disconnect = '$disconnect'
 
@@ -1320,7 +1323,9 @@ class MusicBot(discord.Client):
 
         Call the bot to the summoner's voice channel.
         """
+        #author_name = str(author)
 
+        print("LLEGO HASTA ACA")
 
         if not author.voice_channel:
             raise exceptions.CommandError('You are not in a voice channel!')
@@ -1329,13 +1334,20 @@ class MusicBot(discord.Client):
         if voice_client and voice_client.channel.server == author.voice_channel.server:
             await self.move_voice_client(author.voice_channel)
 
+            print("PRIMER IF")
+
             msg_by_nigga = 'Hora de sacar la basura'
             msg_nigga_disconnect = '$disconnect'
             msg_greetings = 'Weeeena peeeeeeeeeeeeeeeeeeeeeerro'
+            msg_version = 'Bot Version: Version 1.01-RELEASE'
 
+            self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel, "**%s**" % (msg_version))
             self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel, "**%s**" % (msg_greetings))
             self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel, "**%s**" % (msg_by_nigga))
             self.server_specific_data[channel.server]['last_np_msg'] = await self.safe_send_message(channel, "**%s**" % (msg_nigga_disconnect))
+
+            print(channel)
+            print(channel.server)
 
             return
 
@@ -1344,12 +1356,14 @@ class MusicBot(discord.Client):
 
         if not chperms.connect:
             self.safe_print("Cannot join channel \"%s\", no permission." % author.voice_channel.name)
+            print("SEGUNDO IF")
             return Response(
                 "```Cannot join channel \"%s\", no permission.```" % author.voice_channel.name,
                 delete_after=25
             )
 
         elif not chperms.speak:
+            print("TERCER IF")
             self.safe_print("Will not join channel \"%s\", no permission to speak." % author.voice_channel.name)
             return Response(
                 "```Will not join channel \"%s\", no permission to speak.```" % author.voice_channel.name,
@@ -1359,10 +1373,14 @@ class MusicBot(discord.Client):
         player = await self.get_player(author.voice_channel, create=True)
 
         if player.is_stopped:
+            print("PLAYER STOPED")
+
             player.play()
 
         if self.config.auto_playlist:
+            print("AUTOPLAY LIST ENABLED")
             await self.on_player_finished_playing(player)
+
 
     async def cmd_pause(self, player):
         """
@@ -1494,6 +1512,15 @@ class MusicBot(discord.Client):
                 reply=True,
                 delete_after=20
             )
+
+    async def cmd_auto(self, message, player, new_volume=None):
+
+        infile = open('config/autoplaylist.txt', 'r')  # Open the file for reading.
+        data = infile.read()  # Read the contents of the file.
+        print (data)
+        infile.close();
+
+        return Response('Mostrando data:::::: hiteando db....' + data)
 
     async def cmd_vol(self, message, player, new_volume=None):
         """
